@@ -67,7 +67,14 @@ app.post('/products', async (request, response) => {
   }
 });
 
-app.get('/products', (request, response) => {});
+app.get('/products', async (request, response) => {
+  try {
+    const getProduct = await ProductModal.find();
+    response.status(205).send(getProduct);
+  } catch (error) {
+    response.status(505).send({ message: error.message });
+  }
+});
 
 app.listen(port, async () => {
   console.log(`Server running at http://127.0.0.1:${port}`);
