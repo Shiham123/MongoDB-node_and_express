@@ -70,9 +70,35 @@ app.post('/products', async (request, response) => {
 app.get('/products', async (request, response) => {
   try {
     const getProduct = await ProductModal.find();
-    response.status(205).send(getProduct);
+    if (getProduct) {
+      response.status(200).send(getProduct);
+    } else {
+      response.status(404).send({ message: 'products not found' });
+    }
   } catch (error) {
-    response.status(505).send({ message: error.message });
+    response.status(500).send({ message: error.message });
+  }
+});
+
+app.get('/products/:id', async (request, response) => {
+  try {
+    const id = request.params.id;
+    const getProduct = await ProductModal.findOne({ _id: id }).select({
+      title: 1,
+      _id: 0,
+      price: 1,
+    });
+    if (getProduct) {
+      response
+        .status(200)
+        .send({ message: 'return single product', data: getProduct });
+    } else {
+      response
+        .status(500)
+        .send({ success: false, message: 'product not found' });
+    }
+  } catch (error) {
+    response.status(500).send({ message: error.message });
   }
 });
 
