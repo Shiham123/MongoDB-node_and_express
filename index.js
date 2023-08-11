@@ -146,6 +146,33 @@ app.delete('/products/:id', async (request, response) => {
   }
 });
 
+app.put('/products/:id', async (request, response) => {
+  try {
+    const titleBody = request.body.title;
+    const pricesBody = request.body.price;
+    const ratingBody = request.body.rating;
+
+    const id = request.params.id;
+    let product = await ProductModal.findByIdAndUpdate(
+      { _id: id },
+      { $set: { rating: ratingBody, title: titleBody, price: pricesBody } },
+      { new: true }
+    );
+
+    if (product) {
+      response
+        .status(200)
+        .send({ success: true, message: 'updated', data: product });
+    } else {
+      response
+        .status(404)
+        .send({ success: true, message: 'not updated', data: product });
+    }
+  } catch (error) {
+    response.status(500).send({ message: error.message });
+  }
+});
+
 // here are our server listen
 app.listen(port, async () => {
   console.log(`Server running at http://127.0.0.1:${port}`);
