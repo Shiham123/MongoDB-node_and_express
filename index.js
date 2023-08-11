@@ -69,9 +69,20 @@ app.post('/products', async (request, response) => {
 
 app.get('/products', async (request, response) => {
   try {
-    const getProduct = await ProductModal.find();
+    const price = request.query.price;
+    let getProduct;
+    if (price) {
+      getProduct = await ProductModal.find({ price: { $eq: price } });
+    } else {
+      getProduct = await ProductModal.find();
+    }
+
     if (getProduct) {
-      response.status(200).send(getProduct);
+      response.status(200).send({
+        success: true,
+        message: 'return all product',
+        data: getProduct,
+      });
     } else {
       response.status(404).send({ message: 'products not found' });
     }
@@ -83,7 +94,9 @@ app.get('/products', async (request, response) => {
 app.get('/products/:id', async (request, response) => {
   try {
     const id = request.params.id;
-    const getProduct = await ProductModal.findOne({ _id: id }).select({
+    const getProduct = await ProductModal.findOne({
+      _id: id,
+    }).select({
       title: 1,
       _id: 0,
       price: 1,
