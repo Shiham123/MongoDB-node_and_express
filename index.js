@@ -9,13 +9,19 @@ const personUrl = 'mongodb://127.0.0.1:27017/personDB';
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// the validation or schema
 const mondoDBSchema = new mongoose.Schema({
   title: {
     type: String,
     required: true,
   },
   price: {
-    type: String,
+    type: Number,
+    required: true,
+  },
+
+  rating: {
+    type: Number,
     required: true,
   },
   description: String,
@@ -27,13 +33,7 @@ const mondoDBSchema = new mongoose.Schema({
 
 const ProductModal = mongoose.model('Products', mondoDBSchema);
 
-/*
-mongoose
-  .connect('mongodb://127.0.0.1:27017/personDB')
-  .then(() => console.log('database connected'))
-  .catch((error) => console.log('error here', error));
-*/
-
+// the default function for mongoose server connection
 const connectDB = async () => {
   try {
     await mongoose.connect(personUrl);
@@ -47,15 +47,18 @@ app.get('/', (request, response) => {
   response.status(202).send(`<h1>Default page</h1>`);
 });
 
+// product post to the mongoDB
 app.post('/products', async (request, response) => {
   try {
     const titleBody = request.body.title,
       priceBody = request.body.price,
+      ratingBody = request.body.rating,
       descriptionBody = request.body.description;
 
     const newProduct = new ProductModal({
       title: titleBody,
       price: priceBody,
+      rating: ratingBody,
       description: descriptionBody,
     });
 
@@ -67,12 +70,16 @@ app.post('/products', async (request, response) => {
   }
 });
 
+// get product and using query operator
 app.get('/products', async (request, response) => {
   try {
     const price = request.query.price;
+    const rating = request.query.rating;
     let getProduct;
-    if (price) {
-      getProduct = await ProductModal.find({ price: { $eq: price } });
+    if (price && rating) {
+      getProduct = await ProductModal.find({
+        $or: [{ price: { $lt: price } }, { rating: { $lt: rating } }],
+      });
     } else {
       getProduct = await ProductModal.find();
     }
@@ -91,6 +98,7 @@ app.get('/products', async (request, response) => {
   }
 });
 
+// find product with id
 app.get('/products/:id', async (request, response) => {
   try {
     const id = request.params.id;
@@ -115,6 +123,7 @@ app.get('/products/:id', async (request, response) => {
   }
 });
 
+// here are our server listen
 app.listen(port, async () => {
   console.log(`Server running at http://127.0.0.1:${port}`);
   await connectDB();
