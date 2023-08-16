@@ -13,8 +13,12 @@ app.use(express.urlencoded({ extended: true }));
 const mondoDBSchema = new mongoose.Schema({
   title: {
     type: String,
-    required: true,
+    required: [true, 'product title is required'],
+    minLength: [5, 'minimum length should be five'],
+    maxLength: [30, 'max length should be 10'],
+    trim: true,
   },
+
   price: {
     type: Number,
     required: true,
@@ -24,6 +28,7 @@ const mondoDBSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+
   description: String,
   date: {
     type: Date,
@@ -123,6 +128,7 @@ app.get('/products/:id', async (request, response) => {
   }
 });
 
+// delete product
 app.delete('/products/:id', async (request, response) => {
   try {
     const id = request.params.id;
